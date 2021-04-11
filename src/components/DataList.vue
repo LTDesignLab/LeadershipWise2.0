@@ -1,81 +1,5 @@
-<template>
-  <div class="datalist-container">
-    <div class="list-head-container">
-      <div class="head-left"><h1>{{ title }}</h1><div class="add-button" @click="openModal('Add Student')"><div class="add-icon"></div>Add</div></div>
-      <div class="head-right">
-        <div class="search-container">
-          <input @click="collapseLast" v-model="search"  placeholder="Search" type="text" name="search" id="search"/>
-          <div class="search-icon"></div>
-        </div>
-        <div class="filter-button">
-          <div class="order-icon"></div>
-          <select class="filter-button" @change="updateSearchFilter" name="search-filter" id="search-filter">
-              <option value="name">Search by name</option>
-              <option value="email">Search by email</option>
-              <option value="company">Search by company</option>
-              <option value="skill">Search by skill</option>
-              <option value="city">Search by city</option>
-              <option value="tag">Search by tag</option>
-            </select>
-        </div>
-        <div @click="exportDB('students')" class="export-button"><div class="export-icon"></div>{{ ( isExporting ? 'Exporting...' : 'Export' ) }}</div>
-      </div>
-    </div>
-
-    <div class="list-top" :style="(!filteredItems.length == 0  ? 'opacity: 1' : 'opacity: 0' )">
-      <div class="col pre-col"><span>#</span></div>
-      <div v-for="(column, index) in columnTitles" :key="index" class="col"><span>{{ column }}</span></div>
-    </div>
-
-    <div class="list-contents-container" id="scrollable-inner">
-      <div v-if="filteredItems.length == 0" class="no-results"><h4>No Results</h4></div>
-      <div class="services-container">
-        <div class="services-container-right">
-          <ul>
-            <li 
-            class="list-item"
-            :style="'background:'+( index1 % 2 == 0 ? '#f9f9f9' : '#ffffff' )"
-            v-for="(i, index1) in filteredItems" 
-            v-bind:key="index1" 
-            :id="i.email"
-            :class="(index1 != 0 ? '' : 'first-service')">
-              <div :id="'item'+index1" @click="dropdown" class="inner-columns-container">
-                <div class="pre-key-col"><span>{{ index1+1 }}</span></div>
-                <div v-for="(colKey, index2) in columnKeys" :key="index2" class="key-col">
-                  <span :class="( index2 == columnKeys.length - 1 ? 'cozy' : '')">
-                    <div :style="'background-image:url('+ filteredItems[index1].pic +')'" :class="(index2 == 0 ? 'profile-photo' : '' )"></div>
-                    {{ filteredItems[index1][colKey] }}<span v-if="index2 == columnKeys.length - 1" class="percent">%</span>
-                  </span>
-                  <ProgressBar v-if="graphable && index2 == columnKeys.length - 1" :value="parseInt(getAverage(i))" />
-                </div>
-              </div>
-              <div class="droppable">
-                <div class="tags-container">
-                    <div class="test-scores-container">
-                        <b style="font-weight: normal"><strong>Grades </strong> {{ filteredItems[index1].grades.join('%, ') }}%</b>
-                        <div style="margin-left:32px"></div>
-                        <b style="font-weight: normal"><strong>Tags </strong> {{ ( !filteredItems[index1].tags || filteredItems[index1].tags.length == 0 ? 'None' : filteredItems[index1].tags.join(', ')) }}</b>
-                    </div>
-                </div>
-                <div class="bottom-droppable">
-                  <div class="droppable-actions-container">
-                    <div v-if="dropActive" class="drop-btn1"><input v-model="newTag" type="text" placeholder="Add Tag" /></div>
-                    <div v-if="dropActive" @click="updateStudent(currentStudent, newTag)" :class="( !newTag ? 'disabled' : '' )" class="droppable-btn drop-btn2">Submit</div>
-                  </div>
-                  <div v-if="dropActive" @click="removeStudent(currentStudent)" class="remove-student-btn">Remove Student</div>
-                </div>
-              </div>
-            </li>.
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script>
 import ProgressBar from '@/components/ProgressBar.vue';
-import { dbUtils } from '../mixins/dbUtils';
 import store from '../store';
 
 export default {
@@ -83,7 +7,6 @@ export default {
   components: {
     ProgressBar
   },
-  mixins: [dbUtils],
   props: {
     title: {
       type: String,
@@ -111,42 +34,45 @@ export default {
       lastDropped: null,
       dropActive: false,
       currentStudent: null,
-      searchFilter: 'firstName',
-      newTag: null
+      searchFilter: 'name',
+      newScore: null
     }
   },
   mounted() {
-
+    console.log('DataList.vue mounted');
   },
   computed: {
     filteredItems() {
-      if(this.searchFilter != 'tag') {
-        return this.data.filter((item) => {
-            return item[this.searchFilter].toLowerCase().match(this.search.toLowerCase());
-        });
-      } else {
-        return this.data.filter((item) => {
-            return item.tags.join('').toLowerCase().match(this.search.toLowerCase());
-        })
-      }
+      return this.data.filter((item) => {
+        return item[this.searchFilter].toLowerCase().match(this.search.toLowerCase()); //when search matches description, expand that item
+      });
     },
-    isExporting() {
-        return store.state.isExporting;
-    }
+    /*currentStudent() {
+      return
+    }*/
   },
   methods: {
-    getAverage(student) {
-        var sum = 0;
-        for(let i = 0; i < student.grades.length; i++) {
-            sum += parseInt(student.grades[i]);
-        }
-        return (sum / student.grades.length).toFixed(3);
+    handleAdd() {
+      //this.$emit('addToList');
+      store.commit('modalContext', 'Add Student');
     },
     handleExport() {
       this.$emit('exportList');
     },
     dropdown(event) {
-      this.currentStudent = event.currentTarget.childNodes[3].childNodes[0].childNodes[1].textContent;
+      //console.clear();
+
+      this.currentStudent = event.currentTarget.childNodes[2].childNodes[0].innerHTML;
+      console.log('current student: ', this.currentStudent);
+
+      /*
+      
+      --- .droppable is now a sibling of the event target
+      --- currentDroppable should query for the target's only sibling, rather than it's child
+      
+      */
+
+      //console.log(event.currentTarget.nextSibling);
 
       var currentDroppable = event.currentTarget.nextSibling;
       //on first drop
@@ -168,65 +94,89 @@ export default {
     collapseLast() {
       !this.lastDropped ? console.log('nothing to collapse') : this.lastDropped.classList.remove('dropped');
     },
+    handleDroppableBtnClick() {
+      console.clear();
+      console.log('handling droppable button click');
+    },
+    preventCollapse(e) {
+      console.log('oboy');
+      console.log('preventing collapse for ', e);
+    },
     updateSearchFilter(e) {
+      console.log('updating search filter');
+      console.log(e.target.value);
       this.searchFilter = e.target.value;
     }
   }
 }
 </script>
 
+<template>
+  <div class="datalist-container">
+    <div class="list-head-container">
+      <div class="head-left"><h1>{{ title }}</h1><div class="add-button" @click="handleAdd"><div class="add-icon"></div>Add</div></div>
+      <div class="head-right">
+        <div class="search-container">
+          <input @click="collapseLast" v-model="search"  placeholder="Search" type="text" name="search" id="search"/>
+          <div class="search-icon"></div>
+        </div>
+        <div class="filter-button">
+          <div class="order-icon"></div>
+          <select class="filter-button" @change="updateSearchFilter" name="search-filter" id="search-filter">
+              <option value="name">Search by name</option>
+              <option value="email">Search by email</option>
+              <option value="company">Search by company</option>
+              <option value="skill">Search by skill</option>
+              <option value="age">Search by age</option>
+              <option value="score">Search by score</option>
+            </select>
+        </div>
+        <div @click="exportDB('students')" class="export-button"><div class="export-icon"></div>Export</div>
+      </div>
+    </div>
+
+    <div class="list-top" :style="(!filteredItems.length == 0  ? 'opacity: 1' : 'opacity: 0' )">
+      <div class="col pre-col"><span>#</span></div>
+      <div v-for="(column, index) in columnTitles" :key="index" class="col"><span>{{ column }}</span></div>
+    </div>
+
+    <div class="list-contents-container">
+      <div v-if="filteredItems.length == 0" class="no-results"><h4>No Results</h4></div>
+      <div class="services-container">
+        <div class="services-container-right">
+          <ul>
+            <li 
+            class="list-item"
+            :style="'background:'+( index1 % 2 == 0 ? '#f6f6f6' : '#ffffff' )"
+            v-for="(i, index1) in filteredItems" 
+            v-bind:key="index1" 
+            :class="(index1 != 0 ? '' : 'first-service')">
+              <div :id="'item'+index1" @click="dropdown" class="inner-columns-container">
+                <div class="pre-key-col"><span>{{ index1+1 }}</span></div>
+                <div v-for="(colKey, index2) in columnKeys" :key="index2" class="key-col">
+                  <span>{{ filteredItems[index1][colKey] }}</span>
+                  <ProgressBar v-if="graphable && index2 == columnKeys.length - 1" :value="parseInt(filteredItems[index1].age)" />
+                </div>
+              </div>
+              <div class="droppable">
+                <strong style="font-weight: normal; font-size: 14px; margin-left: 12px">{{ filteredItems[index1].description }}</strong>
+                <div class="bottom-droppable">
+                  <div class="droppable-actions-container">
+                    <div v-if="dropActive" class="drop-btn1"><input v-model="newScore" type="number" placeholder="Add Data" /></div>
+                    <div v-if="dropActive" @click="updateStudent(currentStudent, newScore)" :class="( !newScore ? 'disabled' : '' )" class="droppable-btn drop-btn2">Submit</div>
+                  </div>
+                  <div v-if="dropActive" @click="removeStudent(currentStudent)" class="remove-student-btn">Remove Student</div>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <style scoped lang="scss">
-
-.test-scores-container {
-    //width: max-content !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-
-    strong {
-        margin: 0px 32px 0px 0px !important;
-    }
-
-    b {
-        margin-left: 0px 12px 24px 12px !important;
-        display: flex;
-        align-items: center;
-    }
-}
-
-.tags-container {
-    display: flex;
-    text-align: center;
-    justify-content: center;
-}
-
-.pill {
-    //background: #ddd;
-    border-radius: 12px;
-    padding: 0px;
-    margin: 0px 3px 0px 3px !important;
-}
-
-.profile-photo {
-    background: #e0e0e0;
-    height: 36px;
-    width: 36px;
-    border-radius: 100%;
-    margin-right: 24px;
-    margin-left: -18px;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.cozy {
-    //background: red;
-    width: 70px !important;
-}
-
-.percent {
-    margin: 0px !important;
-}
 
 .disabled {
     background: rgba(black,0.1) !important;
@@ -294,7 +244,6 @@ export default {
 .inner-columns-container {
   display: flex;
   width: 100%;
-  flex-basis: auto;
   height: inherit;
   cursor: pointer;
 }
@@ -303,7 +252,7 @@ export default {
   //background-size: 70%;
   background-position: center;
   background-repeat: no-repeat;
-  background-image: url("https://raw.githubusercontent.com/tbrew1023/icommon/c8e31784a53239d9469dc8625b184adbf7b941e3/blue-plus.svg");
+  background-image: url("../assets/icons/blue-plus.svg");
   height: 24px;
   width: 24px;
   //margin-left: -36px;
@@ -346,7 +295,7 @@ export default {
 }
 
 .list-contents-container {
-  height: 75%;
+  height: 180px;
   overflow: auto;
   border-radius: 0px 0px 8px 8px;
 }
@@ -356,16 +305,15 @@ export default {
   width: 100%;
   height: inherit;
   display: flex;
+  justify-content: left;
   align-items: center;
   padding: 24px 0px 24px 0px;
   color: black;
-  justify-content: flex-start;
 
   span {
+    margin-left: 32px;
     font-size: 12px;
     opacity: 1;
-    text-align: left;
-    margin-left: 36px;
   }
 }
 
@@ -414,9 +362,8 @@ export default {
 }
 
 .no-results {
-  margin-top: 120px;
+  margin-top: 24px;
   font-size: 14px;
-  text-align: center;
 }
 
 .search-container {
@@ -430,7 +377,7 @@ export default {
   margin-right: 24px;
 
   #search {
-    width: 600px;
+    width: 300px;
     border: none;
     padding: 12px 0px 12px 24px;
     text-align: left;
@@ -484,7 +431,7 @@ export default {
   color: #4671B1;
 
   .export-icon {
-    background-image: url('https://github.com/tbrew1023/icommon/blob/master/blue-export.png?raw=true');
+    background-image: url('../assets/icons/blue-export.svg');
     background-position: center;
     background-size: 80%;
     background-repeat: no-repeat;
@@ -494,7 +441,7 @@ export default {
   }
 
   .order-icon {
-    background-image: url('https://raw.githubusercontent.com/tbrew1023/icommon/c8e31784a53239d9469dc8625b184adbf7b941e3/blue-filter.svg');
+    background-image: url('../assets/icons/blue-filter.svg');
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
@@ -535,7 +482,7 @@ a {
 
 .datalist-container {
   width: 100%;
-  height: 100%;
+  height: 345px;
 }
 
 .services-container {
@@ -572,8 +519,8 @@ a {
 
       strong {
         margin-top: 6px;
+        margin-left: 24px !important;
         display: none;
-        text-align: center
       }
 
       .bottom-droppable {
@@ -582,7 +529,7 @@ a {
         height: 100%;
         width: 100%;
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
 
         .remove-student-btn {
@@ -618,7 +565,6 @@ a {
       padding-top: 12px;
       pointer-events: all;
       display: flex;
-      margin: 0px;
 
       .remove-student-btn {
         display: block !important;
@@ -629,7 +575,8 @@ a {
       }
 
       strong {
-        text-align: center;
+        margin-top: 6px;
+        margin-left: 24px !important;
         display: block;
       }
       
@@ -650,9 +597,9 @@ a {
         font-size: 14px;
         //text-transform: uppercase;
         //font-weight: bold;
-        //width: 100%;
+        width: 100%;
         display: flex;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
         transition: 100ms;
 

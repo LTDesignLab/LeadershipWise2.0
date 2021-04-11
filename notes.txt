@@ -156,3 +156,10 @@
              part of lesson plan?
 *slide 14* : Employee feedback?
 *slide 15* : Training schedule (automatic vs manual)
+
+// ---------- USER JOURNEY ISSUES ----------
+
+Userbase: {
+    Q: Can anyone sign into the app even if they aren't part of an existing company?
+    Q: 
+}

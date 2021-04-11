@@ -1,23 +1,58 @@
 <template>
   <div class="home">
-    
+    <div class="enterable1 dash-item-container metrics-overview-container">
+      <div class="metrics-overview-item"><MetricOverview :value="36000000" :title="'Budget'" /></div>
+      <div class="metrics-overview-item"><MetricOverview :value="450000" :title="'ROI'" /></div>
+      <div class="metrics-overview-item"><MetricOverview :value="4350000" :title="'Annual Profit'" /></div>
+      <div class="metrics-overview-item"><MetricOverview :value="45" :title="'Lead Conversion'" :percent="true" :fin="false" /></div>
+      <div class="metrics-overview-item"><MetricOverview :value="1350000" :title="'Average Income'" :graph="true" /></div>
+    </div>
+    <div class="dash-item-container graphs-container">
+      <div class=" enterable2 graph-item">
+        <div class="chart bar-graph">
+          
+        </div>
+      </div>
+      <div class=" enterable2 graph-item graph-middle">
+        <div class="chart line-graph">
+
+        </div>
+      </div>
+      <div class=" enterable2 graph-item graph-right">
+        <div class="chart pie-graph">
+
+        </div>
+      </div>
+    </div>
+    <div class="dash-item-container data-list-container">
+      <div class="enterable3 data-list">
+          <DataList 
+          :title="'Employees'" 
+          :test="true" 
+          :expandable="false"
+          :graphable="false"
+          :data="testData" 
+          :columnTitles="['NAME','EMAIL','COMPANY','SKILL','AGE']"
+          :columnKeys="['name','email','company','skill', 'age']"
+          @addToList="handleAdd()"
+          @exportList="handleExport()"
+           />
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-// @ts-nocheck
-//import Banner from '@/components/Banner.vue';
-//import CircleProgress from '@/components/CircleProgress.vue';
-//import DataList from '@/components/DataList.vue';
 import firebase from 'firebase';
 import store from '../store';
+import MetricOverview from '@/components/MetricOverview.vue';
+import DataList from '@/components/DataList.vue';
 
 export default {
   name: 'Home',
   components: {
-    //Banner,
-    //CircleProgress,
-    //DataList,
+    MetricOverview,
+    DataList
   },
   data() {
     return {
@@ -25,7 +60,89 @@ export default {
       students: [],
       allGrades: [],
       totalAverage: 0,
-      studentCount: 0
+      studentCount: 0,
+      testData: [
+        {
+          name: 'Trent Brew',
+          email: 'tbrew1023@gmail.com',
+          company: 'LT Design Lab',
+          skill: 'Web Development',
+          age: 23,
+          description: 'Web Developer living in Chicago'
+        },
+        {
+          name: 'Lawan Alade-Fa',
+          email: 'slafa@ltdesign.io',
+          company: 'Studio LAFA',
+          skill: 'Design',
+          age: 23,
+          description: 'Architect attending Northwestern'
+        },
+        {
+          name: 'Eric Li',
+          email: 'ezli@protonmail.com',
+          company: 'Coinflip',
+          skill: 'Graphic Design',
+          age: 23,
+          description: 'Graphic Designer living in Chicago'
+        },
+        {
+          name: 'Tim Chatman',
+          email: 'tchatman@ltdesign.io',
+          company: 'LT Design Lab',
+          skill: 'Data Science',
+          age: 24,
+          description: 'Data scientist attending DePaul'
+        },
+                {
+          name: 'Lauren Brew',
+          email: 'lbrew@gmail.com',
+          company: 'froSkate',
+          skill: 'Copyediting',
+          age: 22,
+          description: 'Skater, writer, activist'
+        },
+        {
+          name: 'Candice Brew',
+          email: 'candicebrew@gmail.com',
+          company: 'FACTORY PR',
+          skill: 'PR',
+          age: 26,
+          description: 'Branding genius living in New York'
+        },
+        {
+          name: 'Virginia Brew',
+          email: 'vbrew@gmail.com',
+          company: 'LoanDepot',
+          skill: 'Mortgage',
+          age: 47,
+          description: 'Me mama<3'
+        },
+        {
+          name: 'Derrick Brew',
+          email: 'dbrew@gmail.com',
+          company: 'LoanDepot',
+          skill: 'Mortgage',
+          age: 47,
+          description: 'Me papa<3'
+        },
+        {
+          name: 'Manman',
+          email: 'manman@gmail.com',
+          company: 'dbjrFoundation',
+          skill: 'People',
+          age: 24,
+          description: 'Love you manman'
+        },
+        {
+          name: 'Jon Josko',
+          email: 'jonj@gmail.com',
+          company: 'Illinois Policy Institute',
+          skill: 'Data Science',
+          age: 24,
+          description: 'Mario main'
+        }
+      ],
     }
   },
   mounted() {
@@ -127,13 +244,8 @@ $headHeight: 300px;
   width: 100%;
   background: #eee;
   margin-top: 80px;
+  padding: 24px;
   box-sizing: border-box;
-  padding: 36px;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: repeat(12, 1fr);
-  grid-column-gap: 36px;
-  grid-row-gap: 36px;
 }
 
 .data-container {
@@ -171,5 +283,112 @@ $headHeight: 300px;
 .div1 { grid-area: 1 / 10 / 5 / 13; }
 .div2 { grid-area: 1 / 1 / 5 / 10; }
 .div3 { grid-area: 5 / 1 / 13 / 13; }
+
+.metrics-overview-container {
+  //background: black;
+  width: 100%;
+  height: 16%;
+  display: flex;
+
+  .metrics-overview-item {
+    width: 100%;
+    //border: red solid 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.graphs-container {
+  //background:#212121;
+  height: 42%;
+  width: 100%;
+  display: flex;
+}
+
+.data-list-container {
+  //background: gray;
+  height: 42%;
+  width: 100%;
+}
+
+.dash-item-container {
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.graph-item {
+  //border: solid red 1px;
+  width: 100%;
+  height: 100%;
+  border-radius: 24px !important;
+}
+
+.graph-middle {
+  margin-left: 24px;
+  margin-right: 24px;
+}
+
+.data-list {
+  //border: solid 1px red;
+  width: 100%;
+  height: 100%;
+}
+
+.enterable1 {
+  opacity: 0;
+  transform: scale(0.9);
+  animation: flyin 600ms ease forwards 1300ms;
+}
+
+.enterable2 {
+  opacity: 0;
+  transform: scale(0.9);
+  animation: flyin 600ms ease forwards 1400ms;
+}
+
+.enterable3 {
+  opacity: 0;
+  transform: scale(0.9);
+  animation: flyin 600ms ease forwards 1500ms;
+}
+
+.bar-graph {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-image: url('../assets/bar-graph-example.png');
+  height: inherit;
+  width: 100%;
+}
+
+.line-graph {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-image: url('../assets/line-graph-example.png');
+  height: inherit;
+  width: 100%;
+}
+
+.pie-graph {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-image: url('../assets/pie-graph-example.png');
+  height: inherit;
+  width: 100%;
+}
+
+.chart {
+  border-radius: 12px;
+}
+
+@keyframes flyin {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
 </style>
